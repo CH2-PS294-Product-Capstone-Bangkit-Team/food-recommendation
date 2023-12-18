@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Recommendation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        form {
+            max-width: 400px;
+            margin: auto;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #recommendationResult {
+            margin-top: 20px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Menu Recommendation</h2>
+
+    <form id="recommendationForm">
+        <label for="userId">Enter User ID:</label>
+        <input type="number" id="userId" name="userId" required>
+
+        <button type="button" onclick="getRecommendation()">Get Recommendation</button>
+    </form>
+
+    <div id="recommendationResult"></div>
+
+    <script>
+        function getRecommendation() {
+            var userId = document.getElementById("userId").value;
+
+            // You can use fetch or another AJAX method to send the user ID to your Flask API
+            fetch('/recommendation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: userId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayRecommendation(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function displayRecommendation(data) {
+            var resultDiv = document.getElementById("recommendationResult");
+            resultDiv.innerHTML = "";  // Clear previous results
+        
+            if (data.message) {
+                resultDiv.innerHTML = "<p>" + data.message + "</p>";
+            } else {
+                var table = "<table>";
+                table += "<thead><tr><th>Food Code</th><th>Name</th><th>Predicted Rating</th><th>Category</th><th>Type</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fat</th><th>Fiber</th><th>Sugar</th><th>Vitamin A</th><th>Vitamin B6</th><th>Vitamin B12</th><th>Vitamin C</th><th>Vitamin D</th><th>Vitamin E</th></tr></thead><tbody>";
+
+                // Sort the data based on predicted rating
+                var sortedData = data.predicted_rating.map(function(_, index) {
+                    return {
+                        food_code: data.food_code[index],
+                        name: data.name[index],
+                        predicted_rating: data.predicted_rating[index],
+                        category: data.category[index],
+                        type: data.type[index],
+                        calories: data.calories[index],
+                        protein: data.protein[index],
+                        carbs: data.carbs[index],
+                        fat: data.fat[index],
+                        fiber: data.fiber[index],
+                        sugar: data.sugar[index],
+                        vitamin_a: data.vitamin_a[index],
+                        vitamin_b6: data.vitamin_b6[index],
+                        vitamin_b12: data.vitamin_b12[index],
+                        vitamin_c: data.vitamin_c[index],
+                        vitamin_d: data.vitamin_d[index],
+                        vitamin_e: data.vitamin_e[index]
+                    };
+                });
+
+                // Display the top 10 recommendations in the table
+                for (var i = 0; i < Math.min(sortedData.length, 10); i++) {
+                    table += "<tr>";
+                    table += "<td>" + sortedData[i].food_code + "</td>";
+                    table += "<td>" + sortedData[i].name + "</td>";
+                    table += "<td>" + sortedData[i].predicted_rating + "</td>";
+                    table += "<td>" + sortedData[i].category + "</td>";
+                    table += "<td>" + sortedData[i].type + "</td>";
+                    table += "<td>" + sortedData[i].calories + "</td>";
+                    table += "<td>" + sortedData[i].protein + "</td>";
+                    table += "<td>" + sortedData[i].carbs + "</td>";
+                    table += "<td>" + sortedData[i].fat + "</td>";
+                    table += "<td>" + sortedData[i].fiber + "</td>";
+                    table += "<td>" + sortedData[i].sugar + "</td>";
+                    table += "<td>" + sortedData[i].vitamin_a + "</td>";
+                    table += "<td>" + sortedData[i].vitamin_b6 + "</td>";
+                    table += "<td>" + sortedData[i].vitamin_b12 + "</td>";
+                    table += "<td>" + sortedData[i].vitamin_c + "</td>";
+                    table += "<td>" + sortedData[i].vitamin_d + "</td>";
+                    table += "<td>" + sortedData[i].vitamin_e + "</td>";
+                    table += "</tr>";
+                }
+
+                table += "</tbody></table>";
+                resultDiv.innerHTML = table;
+            }
+        }
+    </script>
+
+    </body>
+</html>
